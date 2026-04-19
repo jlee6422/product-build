@@ -7,7 +7,48 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   initRates();
+  initChat();
 });
+
+// ===== Chat Widget =====
+
+function initChat() {
+  const toggle = document.getElementById('chat-toggle');
+  const widget = document.getElementById('chat-widget');
+  const form   = document.getElementById('chat-form');
+  const input  = document.getElementById('chat-input');
+  const messages = document.getElementById('chat-messages');
+
+  toggle.addEventListener('click', () => {
+    widget.classList.toggle('open');
+    if (widget.classList.contains('open')) input.focus();
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+
+    appendMessage(text, 'sent');
+    input.value = '';
+
+    setTimeout(() => {
+      appendMessage("Thanks for your message! We'll get back to you soon.", 'received');
+    }, 800);
+  });
+
+  function appendMessage(text, type) {
+    const div = document.createElement('div');
+    div.className = `chat-msg chat-msg--${type}`;
+    div.innerHTML = `<p>${escapeHtml(text)}</p>`;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+}
 
 // ===== Exchange Rates & Crypto =====
 
