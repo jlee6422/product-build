@@ -24,6 +24,46 @@
         <p>A clean starting point for web development.</p>
         <button id="cta-btn">Get Started</button>
       </section>
+
+      <section class="rates-section">
+        <div class="rates-container">
+          <div class="rates-header">
+            <h2>Market Rates</h2>
+            <span class="rates-updated" id="rates-updated">Loading...</span>
+          </div>
+
+          <div class="rates-tabs">
+            <button class="tab-btn active" data-tab="forex">Forex</button>
+            <button class="tab-btn" data-tab="crypto">Crypto</button>
+          </div>
+
+          <div class="tab-panel active" id="tab-forex">
+            <p class="rates-base">Base: <strong>USD</strong></p>
+            <div class="rates-grid" id="forex-grid">
+              <div class="rate-card skeleton"></div>
+              <div class="rate-card skeleton"></div>
+              <div class="rate-card skeleton"></div>
+              <div class="rate-card skeleton"></div>
+              <div class="rate-card skeleton"></div>
+              <div class="rate-card skeleton"></div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-crypto">
+            <p class="rates-base">Price in <strong>USD</strong></p>
+            <div class="rates-grid" id="crypto-grid">
+              <div class="rate-card skeleton"></div>
+              <div class="rate-card skeleton"></div>
+              <div class="rate-card skeleton"></div>
+              <div class="rate-card skeleton"></div>
+              <div class="rate-card skeleton"></div>
+            </div>
+          </div>
+
+          <p class="rates-error hidden" id="rates-error">Failed to load rates. Please try again later.</p>
+          <p class="rates-source">Data via <a href="https://exchangerate.host" target="_blank" rel="noopener">exchangerate.host</a></p>
+        </div>
+      </section>
     </main>
 
     <footer>

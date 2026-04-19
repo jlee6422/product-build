@@ -113,6 +113,144 @@ button:hover {
   background: var(--color-primary-dark);
 }
 
+/* ===== Rates Section ===== */
+.rates-section {
+  background: var(--color-bg-alt);
+  padding: 4rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.rates-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.rates-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rates-header h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.rates-updated {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+}
+
+.rates-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.tab-btn {
+  background: transparent;
+  color: var(--color-text-light);
+  border: 1px solid var(--color-border);
+  padding: 0.45rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 999px;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.tab-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.rates-base {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: 1rem;
+}
+
+.rates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.rate-card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rate-card .rate-symbol {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rate-card .rate-name {
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+}
+
+.rate-card .rate-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 0.25rem;
+}
+
+.rate-card.skeleton {
+  min-height: 96px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.rates-error {
+  text-align: center;
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.rates-source {
+  margin-top: 1.5rem;
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+  text-align: right;
+}
+
+.hidden {
+  display: none !important;
+}
+
 /* ===== Footer ===== */
 footer {
   text-align: center;
