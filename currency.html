@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Market context, potential influences, and related news for a selected currency."
+    />
+    <title>Currency Details | Invia</title>
+    <link rel="stylesheet" href="/css/currency.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a class="logo" href="/">Invia</a>
+        <a class="back-link" href="/">
+          <span aria-hidden="true">&larr;</span>
+          Back to market rates
+        </a>
+      </nav>
+    </header>
+
+    <main class="currency-page">
+      <section class="currency-hero" aria-labelledby="currency-title">
+        <div>
+          <p class="eyebrow">Currency overview</p>
+          <div class="currency-heading">
+            <span class="currency-symbol" id="currency-symbol">---</span>
+            <h1 id="currency-title">Loading currency...</h1>
+          </div>
+        </div>
+
+        <div class="rate-panel" aria-live="polite">
+          <p class="rate-label" id="rate-label">Current exchange rate</p>
+          <p class="rate-value" id="rate-value">Loading...</p>
+          <p class="rate-updated" id="rate-updated">Retrieving the latest available rate</p>
+        </div>
+      </section>
+
+      <div class="detail-grid">
+        <section class="content-card influences-card" aria-labelledby="influences-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Market context</p>
+              <h2 id="influences-title">Potential market influences</h2>
+            </div>
+          </div>
+
+          <div class="state state--loading" id="influences-loading" role="status">
+            <span class="spinner" aria-hidden="true"></span>
+            <p>Analyzing recent market coverage...</p>
+          </div>
+
+          <div class="state state--empty hidden" id="influences-empty">
+            <h3>No influences found</h3>
+            <p>There is not enough recent reporting to identify potential influences.</p>
+          </div>
+
+          <div class="state state--error hidden" id="influences-error" role="alert">
+            <h3>Market context is unavailable</h3>
+            <p>We could not load potential influences right now. Please try again later.</p>
+          </div>
+
+          <div class="influences-content hidden" id="influences-content">
+            <p class="influences-summary" id="influences-summary"></p>
+            <ul class="influences-list" id="influences-list"></ul>
+          </div>
+        </section>
+
+        <aside class="source-card" aria-labelledby="source-title">
+          <span class="sample-badge">Sample data</span>
+          <h2 id="source-title">How this is prepared</h2>
+          <p>
+            Potential influences are summarized from recent reporting and are presented
+            as context, not as proof that a specific event caused a price movement.
+          </p>
+        </aside>
+      </div>
+
+      <section class="content-card news-section" aria-labelledby="news-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Latest coverage</p>
+            <h2 id="news-title">Related news</h2>
+          </div>
+          <p class="news-count hidden" id="news-count" aria-live="polite"></p>
+        </div>
+
+        <div class="state state--loading" id="news-loading" role="status">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>Finding relevant news...</p>
+        </div>
+
+        <div class="state state--empty hidden" id="news-empty">
+          <h3>No recent articles found</h3>
+          <p>Try checking again later as new reporting becomes available.</p>
+        </div>
+
+        <div class="state state--error hidden" id="news-error" role="alert">
+          <h3>News is unavailable</h3>
+          <p>We could not retrieve related articles right now. Please try again later.</p>
+        </div>
+
+        <div class="news-list hidden" id="news-list"></div>
+      </section>
+
+      <section class="disclaimer" aria-labelledby="disclaimer-title">
+        <h2 id="disclaimer-title">Financial information disclaimer</h2>
+        <p>
+          Rates and summaries are provided for general informational purposes only and
+          may be delayed or incomplete. They are not financial, investment, or trading
+          advice. Review original news sources and conduct your own research before
+          making financial decisions.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>&copy; 2026 Invia. All rights reserved.</p>
+    </footer>
+
+    <script src="/js/currency.js" type="module"></script>
+  </body>
+</html>

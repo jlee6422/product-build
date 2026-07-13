@@ -1,0 +1,260 @@
+## 1. Make every rate card clickable
+
+  Update renderForex() and renderCrypto() in js/main.js to render links:
+
+  return `
+    <a class="rate-card"
+       href="/currency.html?type=forex&symbol=${sym}">
+      <span class="rate-symbol">${sym}</span>
+      <span class="rate-name">${FOREX_NAMES[sym]}</span>
+      <span class="rate-value">${value.toFixed(4)}</span>
+    </a>`;
+
+  For cryptocurrency cards:
+
+  href="/currency.html?type=crypto&symbol=${meta.symbol}"
+
+  Then update the card CSS so links do not look like ordinary text links:
+
+  .rate-card {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .rate-card:hover {
+    text-decoration: none;
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+  }
+
+  ## 2. Create the currency detail page
+
+  Add currency.html with these areas:
+
+  - Back-to-market link
+  - Currency name and symbol
+  - Current exchange rate
+  - Potential market influences
+  - Related-news list
+  - Loading, empty, and error states
+  - Source and financial-information disclaimer
+
+  Load dedicated files from it:
+
+  <link rel="stylesheet" href="/css/currency.css" />
+  <script src="/js/currency.js" type="module"></script>
+
+  ## 3. Read and validate the selected currency
+
+  In js/currency.js, read the URL parameters:
+
+  const params = new URLSearchParams(window.location.search);
+  const type = params.get('type');
+  const symbol = params.get('symbol')?.toUpperCase();
+
+  const allowedForex = ['EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF'];
+  const allowedCrypto = ['BTC', 'ETH', 'BNB', 'XRP', 'SOL'];
+
+  const allowedSymbols = type === 'forex' ? allowedForex : allowedCrypto;
+
+  if (!['forex', 'crypto'].includes(type) || !allowedSymbols.includes(symbol)) {
+    window.location.href = '/';
+  }
+
+  Never place arbitrary URL parameter values directly into innerHTML.
+
+  ## 4. Add shared currency metadata
+
+  Create js/currency-meta.js:
+
+  export const CURRENCY_META = {
+    EUR: {
+      name: 'Euro',
+      type: 'forex',
+      searchTerms: ['euro', 'EUR', 'ECB', 'eurozone economy']
+    },
+    GBP: {
+      name: 'British Pound',
+      type: 'forex',
+      searchTerms: ['pound sterling', 'GBP', 'Bank of England']
+    },
+    BTC: {
+      name: 'Bitcoin',
+      type: 'crypto',
+      searchTerms: ['Bitcoin', 'BTC', 'cryptocurrency market']
+    }
+  };
+
+  Add entries for every supported currency.
+
+  ## 5. Display the current market rate
+
+  Reuse the existing exchange-rate and CoinGecko requests on the detail page.
+
+  For a cleaner structure, move shared rate-fetching functions from main.js into:
+
+  js/
+  ├── rates-api.js
+  ├── main.js
+  └── currency.js
+
+  Then both pages can import the same functions.
+
+  ## 6. Build the page with temporary news data
+
+  Before connecting an API, create a few mock articles:
+
+  const mockResponse = {
+    marketSummary: 'The euro may be responding to inflation data...',
+    factors: [
+      'ECB interest-rate expectations',
+      'Eurozone inflation reports',
+      'Changes in US-dollar demand'
+    ],
+    articles: [
+      {
+        title: 'ECB officials discuss the outlook for interest rates',
+        summary: 'Officials commented on inflation and future policy...',
+        source: 'Example News',
+        url: 'https://example.com',
+        publishedAt: '2026-07-13T10:00:00Z'
+      }
+    ]
+  };
+
+  Finish the page layout and responsive design with this data first.
+
+  ## 7. Choose a news provider
+
+  Select a service that provides:
+
+  - Keyword or topic searching
+  - Publication date
+  - Article title and URL
+  - Source name
+  - Description or article content
+  - Commercial-use terms that fit your project
+
+  Check its pricing, request limits, and attribution requirements before building around it.
+
+  ## 8. Add a backend endpoint
+
+  Do not call paid news or AI APIs directly from browser JavaScript because that exposes API keys.
+
+  Create an endpoint such as:
+
+  GET /api/currency-news?type=forex&symbol=EUR
+
+  Its workflow should be:
+
+  1. Validate the currency.
+  2. Obtain its configured search terms.
+  3. Request recent news.
+  4. Remove duplicate articles.
+  5. Rank by relevance and recency.
+  6. Produce short summaries.
+  7. Return normalized JSON.
+
+  If you plan to deploy on Vercel or Netlify, this endpoint can be a serverless function. For a larger application, use an Express or
+  similar backend.
+
+  ## 9. Add environment variables
+
+  Store secrets outside the code:
+
+  NEWS_API_KEY=...
+  OPENAI_API_KEY=...
+
+  Add .env to .gitignore.
+
+  Only variables explicitly intended for public browser use should have a VITE_ prefix. News and AI secrets should not.
+
+  ## 10. Add AI summarization
+
+  Send the selected article information to your summarization service from the backend.
+
+  Require it to:
+
+  - Use only the supplied articles
+  - Avoid claiming definite causation
+  - Identify two to four potential influences
+  - Keep each article summary short
+  - Preserve the source URL
+  - Return structured JSON
+  - State when evidence is insufficient
+
+  Treat the output as an explanation of possible market influences, not trading advice.
+
+  ## 11. Connect the page to your backend
+
+  In currency.js:
+
+  const response = await fetch(
+    `/api/currency-news?type=${encodeURIComponent(type)}&symbol=${encodeURIComponent(symbol)}`
+  );
+
+  if (!response.ok) {
+    throw new Error('Unable to load currency news');
+  }
+
+  const data = await response.json();
+  renderSummary(data);
+  renderArticles(data.articles);
+
+  Include visible loading and retry behavior.
+
+  ## 12. Add caching and request limits
+
+  Cache results by currency for approximately 10–30 minutes:
+
+  currency-news:forex:EUR
+  currency-news:crypto:BTC
+
+  This reduces:
+
+  - News API requests
+  - AI summarization costs
+  - Page-loading time
+  - Rate-limit failures
+
+  ## 13. Handle edge cases
+
+  Test these situations:
+
+  - Invalid currency in the URL
+  - No relevant articles
+  - News API unavailable
+  - AI summarization unavailable
+  - Article missing an image or description
+  - Duplicate stories from multiple publications
+  - Very long headlines
+  - Slow mobile connection
+  - News articles written in different languages
+
+  The page should still display the exchange rate when news cannot load.
+
+  ## 14. Test the complete flow
+
+  Verify:
+
+  1. Every forex card opens the correct page.
+  2. Every cryptocurrency card opens the correct page.
+  3. Browser Back returns to the dashboard.
+  4. Refreshing the detail page still works.
+  5. External articles open safely with target="_blank" and rel="noopener noreferrer".
+  6. The layout works on mobile.
+  7. Keyboard users can focus and activate every card.
+  8. API keys do not appear in browser requests or bundled files.
+
+  ## 15. Deploy and monitor
+
+  After deployment, track:
+
+  - API errors
+  - News request volume
+  - Summarization costs
+  - Cache effectiveness
+  - Currencies that frequently return no results
+
+  The fastest MVP is steps 1–6 with mock news. Once the interface works, add the backend and real news through steps 7–15.

@@ -1,3 +1,11 @@
+import { CURRENCY_META } from './currency-meta.js';
+import {
+  CRYPTO_IDS,
+  CRYPTO_ID_BY_SYMBOL,
+  fetchCryptoPrices,
+  fetchForexRates,
+} from './rates-api.js';
+
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -54,20 +62,9 @@ function initChat() {
 
 const FOREX_SYMBOLS = ['EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF'];
 
-const FOREX_NAMES = {
-  EUR: 'Euro', GBP: 'British Pound', JPY: 'Japanese Yen',
-  CAD: 'Canadian Dollar', AUD: 'Australian Dollar', CHF: 'Swiss Franc',
-};
-
-const CRYPTO_IDS = ['bitcoin', 'ethereum', 'binancecoin', 'ripple', 'solana'];
-
-const CRYPTO_META = {
-  bitcoin:     { symbol: 'BTC', name: 'Bitcoin' },
-  ethereum:    { symbol: 'ETH', name: 'Ethereum' },
-  binancecoin: { symbol: 'BNB', name: 'BNB' },
-  ripple:      { symbol: 'XRP', name: 'XRP' },
-  solana:      { symbol: 'SOL', name: 'Solana' },
-};
+const CRYPTO_SYMBOLS = Object.fromEntries(
+  Object.entries(CRYPTO_ID_BY_SYMBOL).map(([symbol, id]) => [id, symbol]),
+);
 
 const REFRESH_INTERVAL = 30;
 let secondsUntilRefresh = 0;
@@ -104,17 +101,10 @@ async function fetchRates() {
   secondsUntilRefresh = REFRESH_INTERVAL;
 
   try {
-    const [forexRes, cryptoRes] = await Promise.all([
-      fetch('https://open.er-api.com/v6/latest/USD'),
-      fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${CRYPTO_IDS.join(',')}&vs_currencies=usd`),
+    const [forexData, cryptoData] = await Promise.all([
+      fetchForexRates(),
+      fetchCryptoPrices(),
     ]);
-
-    if (!forexRes.ok || !cryptoRes.ok) throw new Error('Network error');
-
-    const forexData = await forexRes.json();
-    const cryptoData = await cryptoRes.json();
-
-    if (forexData.result !== 'success') throw new Error('Forex API error');
 
     renderForex(forexData.rates);
     renderCrypto(cryptoData);
@@ -140,28 +130,29 @@ function renderForex(rates) {
     const value = rates[sym];
     if (!value) return '';
     return `
-      <div class="rate-card">
+      <a class="rate-card" href="/currency.html?type=forex&symbol=${sym}">
         <span class="rate-symbol">${sym}</span>
-        <span class="rate-name">${FOREX_NAMES[sym]}</span>
+        <span class="rate-name">${CURRENCY_META[sym].name}</span>
         <span class="rate-value">${value.toFixed(4)}</span>
-      </div>`;
+      </a>`;
   }).join('');
 }
 
 function renderCrypto(data) {
   const grid = document.getElementById('crypto-grid');
   grid.innerHTML = CRYPTO_IDS.map(id => {
-    const meta = CRYPTO_META[id];
+    const symbol = CRYPTO_SYMBOLS[id];
+    const meta = CURRENCY_META[symbol];
     const price = data[id]?.usd;
     if (!price) return '';
     const formatted = price >= 1
       ? price.toLocaleString('en-US', { maximumFractionDigits: 2 })
       : price.toFixed(6);
     return `
-      <div class="rate-card">
-        <span class="rate-symbol">${meta.symbol}</span>
+      <a class="rate-card" href="/currency.html?type=crypto&symbol=${symbol}">
+        <span class="rate-symbol">${symbol}</span>
         <span class="rate-name">${meta.name}</span>
         <span class="rate-value">$${formatted}</span>
-      </div>`;
+      </a>`;
   }).join('');
 }
