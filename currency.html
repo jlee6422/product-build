@@ -57,9 +57,17 @@
             <p>There is not enough recent reporting to identify potential influences.</p>
           </div>
 
+          <div class="state state--insufficient hidden" id="influences-insufficient" role="status">
+            <h3>Not enough evidence</h3>
+            <p id="influences-insufficient-message">
+              Recent articles are available, but they do not provide enough evidence for a reliable market summary.
+            </p>
+          </div>
+
           <div class="state state--error hidden" id="influences-error" role="alert">
             <h3>Market context is unavailable</h3>
-            <p>We could not load potential influences right now. Please try again later.</p>
+            <p id="influences-error-message">We could not load potential influences right now.</p>
+            <button class="retry-button news-retry" type="button">Try again</button>
           </div>
 
           <div class="influences-content hidden" id="influences-content">
@@ -69,7 +77,7 @@
         </section>
 
         <aside class="source-card" aria-labelledby="source-title">
-          <span class="sample-badge">Sample data</span>
+          <span class="data-badge">Sourced reporting</span>
           <h2 id="source-title">How this is prepared</h2>
           <p>
             Potential influences are summarized from recent reporting and are presented
@@ -99,7 +107,8 @@
 
         <div class="state state--error hidden" id="news-error" role="alert">
           <h3>News is unavailable</h3>
-          <p>We could not retrieve related articles right now. Please try again later.</p>
+          <p id="news-error-message">We could not retrieve related articles right now.</p>
+          <button class="retry-button news-retry" type="button">Try again</button>
         </div>
 
         <div class="news-list hidden" id="news-list"></div>

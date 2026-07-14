@@ -1,0 +1,57 @@
+{
+  "EUR": {
+    "name": "Euro",
+    "type": "forex",
+    "searchTerms": ["euro", "EUR/USD", "ECB", "eurozone"]
+  },
+  "GBP": {
+    "name": "British Pound",
+    "type": "forex",
+    "searchTerms": ["pound sterling", "GBP/USD", "Bank of England", "UK economy"]
+  },
+  "JPY": {
+    "name": "Japanese Yen",
+    "type": "forex",
+    "searchTerms": ["Japanese yen", "USD/JPY", "Bank of Japan", "BOJ"]
+  },
+  "CAD": {
+    "name": "Canadian Dollar",
+    "type": "forex",
+    "searchTerms": ["Canadian dollar", "USD/CAD", "Bank of Canada", "Canada economy"]
+  },
+  "AUD": {
+    "name": "Australian Dollar",
+    "type": "forex",
+    "searchTerms": ["Australian dollar", "AUD/USD", "Reserve Bank of Australia", "Australia economy"]
+  },
+  "CHF": {
+    "name": "Swiss Franc",
+    "type": "forex",
+    "searchTerms": ["Swiss franc", "USD/CHF", "Swiss National Bank", "Switzerland economy"]
+  },
+  "BTC": {
+    "name": "Bitcoin",
+    "type": "crypto",
+    "searchTerms": ["Bitcoin", "BTC", "Bitcoin ETF", "cryptocurrency market"]
+  },
+  "ETH": {
+    "name": "Ethereum",
+    "type": "crypto",
+    "searchTerms": ["Ethereum", "ETH", "Ethereum network", "cryptocurrency market"]
+  },
+  "BNB": {
+    "name": "BNB",
+    "type": "crypto",
+    "searchTerms": ["BNB", "Binance Coin", "Binance", "cryptocurrency market"]
+  },
+  "XRP": {
+    "name": "XRP",
+    "type": "crypto",
+    "searchTerms": ["XRP", "Ripple", "crypto regulation", "cryptocurrency market"]
+  },
+  "SOL": {
+    "name": "Solana",
+    "type": "crypto",
+    "searchTerms": ["Solana", "SOL", "Solana network", "cryptocurrency market"]
+  }
+}

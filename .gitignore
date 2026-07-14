@@ -8,3 +8,9 @@ Thumbs.db
 
 # Dependencies (if you add Node later)
 node_modules/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+.vercel

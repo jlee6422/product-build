@@ -5,6 +5,9 @@ import {
   fetchForexRates,
 } from './rates-api.js';
 
+const NEWS_TIMEOUT_MS = 12_000;
+let activeNewsController;
+
 const params = new URLSearchParams(window.location.search);
 const type = params.get('type');
 const symbol = params.get('symbol')?.toUpperCase();
@@ -26,10 +29,12 @@ if (!['forex', 'crypto'].includes(type) || !allowedSymbols.includes(symbol)) {
     : `1 USD in ${symbol}`;
 
   loadCurrentRate();
-
-  const mockResponse = createMockResponse(CURRENCY_META[symbol]);
-  renderMarketContent(mockResponse);
+  loadCurrencyNews();
 }
+
+document.querySelectorAll('.news-retry').forEach(button => {
+  button.addEventListener('click', loadCurrencyNews);
+});
 
 async function loadCurrentRate() {
   const ratePanel = document.querySelector('.rate-panel');
@@ -94,66 +99,115 @@ function formatUpdatedTime(value) {
   })}`;
 }
 
-function createMockResponse(metadata) {
-  const isCrypto = metadata.type === 'crypto';
-  const policyTopic = isCrypto ? 'network developments' : 'central-bank policy';
-  const activityTopic = isCrypto ? 'digital-asset activity' : 'new economic data';
+async function loadCurrencyNews() {
+  activeNewsController?.abort();
+  const controller = new AbortController();
+  activeNewsController = controller;
+  let didTimeout = false;
 
-  return {
-    marketSummary: `${metadata.name} may be responding to ${policyTopic}, ${activityTopic}, and changes in broader market sentiment. These are sample influences for the page prototype.`,
-    factors: isCrypto
-      ? [
-          `${metadata.name} network and ecosystem developments`,
-          'Changes in cryptocurrency market sentiment',
-          'Shifts in regulation and US-dollar demand',
-        ]
-      : [
-          `${metadata.searchTerms[2]} interest-rate expectations`,
-          `${metadata.name}-related inflation and economic reports`,
-          'Changes in US-dollar demand and global risk sentiment',
-        ],
-    articles: [
-      {
-        title: `${metadata.name} markets focus on the latest ${policyTopic}`,
-        summary: `Market participants are assessing how recent ${policyTopic} could affect demand for ${metadata.name}. This is temporary sample content.`,
-        source: 'Example News',
-        url: 'https://example.com/',
-        publishedAt: '2026-07-13T10:00:00Z',
-      },
-      {
-        title: `${activityTopic[0].toUpperCase()}${activityTopic.slice(1)} draws investor attention`,
-        summary: `New developments have prompted investors to revisit their expectations for ${metadata.name} and related markets. This is temporary sample content.`,
-        source: 'Market Daily',
-        url: 'https://example.com/',
-        publishedAt: '2026-07-13T07:30:00Z',
-      },
-      {
-        title: `US-dollar demand shapes the outlook for ${metadata.name}`,
-        summary: `Broader shifts in dollar demand and risk appetite may be contributing to recent price movements. This is temporary sample content.`,
-        source: 'Finance Wire',
-        url: 'https://example.com/',
-        publishedAt: '2026-07-12T21:15:00Z',
-      },
-    ],
-  };
+  setNewsLoading();
+
+  const timeoutId = window.setTimeout(() => {
+    didTimeout = true;
+    controller.abort();
+  }, NEWS_TIMEOUT_MS);
+
+  try {
+    const query = new URLSearchParams({ type, symbol });
+    const response = await fetch(`/api/currency-news?${query}`, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Currency news request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (!data || !Array.isArray(data.articles)) {
+      throw new Error('Currency news returned an invalid response');
+    }
+
+    if (activeNewsController !== controller) return;
+    renderMarketContent(data);
+  } catch (error) {
+    if (activeNewsController !== controller) return;
+
+    console.error('Currency news fetch error:', error);
+    const message = didTimeout
+      ? 'The request took too long. Check your connection and try again.'
+      : 'We could not retrieve recent currency news. Please try again.';
+    showNewsError(message);
+  } finally {
+    window.clearTimeout(timeoutId);
+    if (activeNewsController === controller) activeNewsController = undefined;
+  }
+}
+
+function setNewsLoading() {
+  document.getElementById('news-count').classList.add('hidden');
+  document.getElementById('news-list').replaceChildren();
+  document.getElementById('influences-list').replaceChildren();
+  setSectionState('influences', 'loading');
+  setSectionState('news', 'loading');
+}
+
+function showNewsError(message) {
+  document.getElementById('influences-error-message').textContent = message;
+  document.getElementById('news-error-message').textContent = message;
+  setSectionState('influences', 'error');
+  setSectionState('news', 'error');
 }
 
 function renderMarketContent(data) {
-  renderInfluences(data);
-  renderArticles(data.articles);
+  const articles = data.articles;
+
+  if (!articles.length) {
+    setSectionState('influences', 'empty');
+    setSectionState('news', 'empty');
+    return;
+  }
+
+  renderInfluences(data, articles);
+  renderArticles(articles);
 }
 
-function renderInfluences(data) {
-  if (!data.marketSummary || !data.factors?.length) {
-    setSectionState('influences', 'empty');
+function renderInfluences(data, articles) {
+  if (!data.evidenceSufficient || !data.marketSummary || !data.factors?.length) {
+    const fallbackMessage = data.marketSummary
+      || 'Recent articles are available, but they do not provide enough evidence for a reliable market summary.';
+    document.getElementById('influences-insufficient-message').textContent = fallbackMessage;
+    setSectionState('influences', 'insufficient');
     return;
   }
 
   document.getElementById('influences-summary').textContent = data.marketSummary;
+  const articlesById = new Map(articles.map(article => [article.id, article]));
 
   const factors = data.factors.map(factor => {
     const item = document.createElement('li');
-    item.textContent = factor;
+    item.className = 'influence-item';
+
+    const label = document.createElement('span');
+    label.className = 'influence-label';
+    label.textContent = factor.label;
+    item.append(label);
+
+    const supportingArticles = (factor.articleIds || [])
+      .map(articleId => articlesById.get(articleId))
+      .filter(Boolean);
+
+    if (supportingArticles.length) {
+      const sources = document.createElement('div');
+      sources.className = 'influence-sources';
+      supportingArticles.forEach(article => {
+        const link = createArticleLink(article.url, article.source);
+        link.className = 'influence-source';
+        sources.append(link);
+      });
+      item.append(sources);
+    }
+
     return item;
   });
 
@@ -171,7 +225,7 @@ function renderArticles(articles) {
   document.getElementById('news-list').replaceChildren(...articleCards);
 
   const newsCount = document.getElementById('news-count');
-  newsCount.textContent = `${articles.length} sample articles`;
+  newsCount.textContent = `${articles.length} related ${articles.length === 1 ? 'article' : 'articles'}`;
   newsCount.classList.remove('hidden');
   setSectionState('news', 'list');
 }
@@ -197,7 +251,9 @@ function createArticleCard(article) {
   heading.append(titleLink);
 
   const summary = document.createElement('p');
-  summary.textContent = article.summary;
+  summary.textContent = article.summary
+    || article.description
+    || 'Open the original article to read the full report.';
 
   const readLink = createArticleLink(article.url, 'Read original article →');
   readLink.className = 'read-link';
@@ -240,7 +296,7 @@ function formatPublishedDate(value) {
 
 function setSectionState(section, activeState) {
   const states = section === 'influences'
-    ? ['loading', 'empty', 'error', 'content']
+    ? ['loading', 'empty', 'insufficient', 'error', 'content']
     : ['loading', 'empty', 'error', 'list'];
 
   states.forEach(state => {
